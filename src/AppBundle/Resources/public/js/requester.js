@@ -39,12 +39,21 @@ var UrlBox = React.createClass({
     },
 
     render: function() {
+        var current = this.state.data;
         var conn = new ab.Session('ws://172.17.0.2:8080',
             function() {
                 conn.subscribe('url_info', function(topic, data) {
-                    console.log(data);
-                    console.log(topic);
+                    for (var i = 0; i < data.length; i++) {
+                        for (var j = 0; j < current.length; j++) {
+                            if (current[j].id == data[i].id) {
+                                current[j] = data[i];
+                                break;
+                            }
+                        }
+                    }
                 });
+
+                console.log(current);
             },
             function() {
                 console.warn('WebSocket connection closed');

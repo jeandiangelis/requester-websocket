@@ -75,8 +75,6 @@ class UrlMessenger implements WampServerInterface
      */
     public function onTopicEntry($entry)
     {
-        var_dump($entry);
-        var_dump($this->subscribedTopics->isEmpty());
         $entryData = json_decode($entry, true);
 
         if ($this->subscribedTopics->isEmpty()) {
