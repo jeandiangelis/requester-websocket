@@ -40,11 +40,21 @@ var UrlBox = React.createClass({
 
     render: function() {
 
+        // var conn = new WebSocket('ws://172.17.0.2:8080');
+        //
+        // conn.onopen = function(e) {
+        //     console.log("Connection established!");
+        // };
+        //
+        // conn.onmessage = function(e) {
+        //     console.log(e.data);
+        // };
+
         var conn = new ab.Session('ws://172.17.0.2:8080',
             function() {
-                conn.subscribe('kittensCategory', function(topic, data) {
-                    // This is where you would add the new article to the DOM (beyond the scope of this tutorial)
-                    console.log('New article published to category "' + topic + '" : ' + data.title);
+                conn.subscribe('url_info', function(topic, data) {
+                    console.log(data);
+                    console.log(topic);
                 });
             },
             function() {

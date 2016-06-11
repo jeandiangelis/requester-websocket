@@ -20,12 +20,12 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
-//        $a = $this->getDoctrine()->getRepository(Url::class)->findAll();
-//        foreach ($a as $b) {
-//            $this->getDoctrine()->getManager()->remove($b);
-//        }
-//
-//        $this->getDoctrine()->getManager()->flush();
+        $a = $this->getDoctrine()->getRepository(Url::class)->findAll();
+        foreach ($a as $b) {
+            $this->getDoctrine()->getManager()->remove($b);
+        }
+
+        $this->getDoctrine()->getManager()->flush();
         return $this->render('AppBundle::index.html.twig');
     }
 
@@ -52,10 +52,6 @@ class DefaultController extends Controller
      */
     public function saveUrls(Request $request)
     {
-        $context = new \ZMQContext();
-        $socket = $context->getSocket(\ZMQ::SOCKET_PUSH, 'my pusher');
-        $socket->connect("tcp://172.17.0.2:5555");
-
         $urls = explode("\n", $request->get('urls'));
 
         $doctrine = $this->getDoctrine();
@@ -80,6 +76,10 @@ class DefaultController extends Controller
 
         $doctrine->getManager()->flush();
 
+        $context = new \ZMQContext();
+        $socket = $context->getSocket(\ZMQ::SOCKET_PUSH, 'my pusher');
+        $socket->connect("tcp://172.17.0.2:5555");
+        
         foreach ($entities as $entity) {
             $jsonentity = $this->get('jms_serializer')->serialize($entity, 'json');
             $socket->send($jsonentity);

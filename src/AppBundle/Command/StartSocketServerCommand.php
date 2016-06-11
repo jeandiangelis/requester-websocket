@@ -47,7 +47,7 @@ class StartSocketServerCommand extends ContainerAwareCommand
         $context = new Context($loop);
         $pull = $context->getSocket(\ZMQ::SOCKET_PULL);
         $pull->bind('tcp://172.17.0.2:5555');
-        $pull->on('message', [$urlMsg, 'onUrlEntry']);
+        $pull->on('message', [$urlMsg, 'onTopicEntry']);
 
         $webSock = new Server($loop);
         $webSock->listen(8080, '0.0.0.0');

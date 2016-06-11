@@ -14,7 +14,16 @@ class UrlMessenger implements WampServerInterface
     /**
      * A lookup of all the topics clients have subscribed to
      */
-    protected $urls = [];
+    protected $subscribedTopics;
+
+    /**
+     * UrlMessenger constructor.
+     */
+    public function __construct()
+    {
+        $this->subscribedTopics = new \SplStack();
+    }
+
 
     public function onOpen(ConnectionInterface $conn)
     {
@@ -26,14 +35,14 @@ class UrlMessenger implements WampServerInterface
 
     }
 
-    public function onCall(ConnectionInterface $conn, $id, $url, array $params)
+    public function onCall(ConnectionInterface $conn, $id, $topic, array $params)
     {
 
     }
 
-    public function onPublish(ConnectionInterface $conn, $url, $event, array $exclude, array $eligible)
+    public function onPublish(ConnectionInterface $conn, $topic, $event, array $exclude, array $eligible)
     {
-        $conn->close();
+
     }
 
     public function onError(ConnectionInterface $conn, \Exception $e)
@@ -44,19 +53,21 @@ class UrlMessenger implements WampServerInterface
     /**
      * A request to subscribe to a topic has been made
      * @param \Ratchet\ConnectionInterface $conn
-     * @param string|Topic $url The topic to subscribe to
+     * @param string|Topic $topic The topic to subscribe to
      */
-    public function onSubscribe(ConnectionInterface $conn, $url)
+    public function onSubscribe(ConnectionInterface $conn, $topic)
     {
-        $this->urls[$url->getId()] = $url;
+        if ($this->subscribedTopics->isEmpty()) {
+            $this->subscribedTopics->push($topic);
+        }
     }
 
     /**
      * A request to unsubscribe from a topic has been made
      * @param \Ratchet\ConnectionInterface $conn
-     * @param string|Topic $url The topic to unsubscribe from
+     * @param string|Topic $topic The topic to unsubscribe from
      */
-    public function onUnSubscribe(ConnectionInterface $conn, $url)
+    public function onUnSubscribe(ConnectionInterface $conn, $topic)
     {
 
     }
@@ -64,16 +75,10 @@ class UrlMessenger implements WampServerInterface
     /**
      * @param string JSON'ified string we'll receive from ZeroMQ
      */
-    public function onUrlEntry($entry)
+    public function onTopicEntry($entry)
     {
         $entryData = json_decode($entry, true);
-
-        if (!array_key_exists($entryData['id'], $this->urls)) {
-            return;
-        }
-
-        $url = $this->urls[$entryData['id']];
-
-        $url->broadcast($entryData);
+        $topic = $this->subscribedTopics->pop();
+        $topic->broadcast($entryData);
     }
 }
