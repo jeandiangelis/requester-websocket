@@ -79,11 +79,7 @@ class DefaultController extends Controller
         $context = new \ZMQContext();
         $socket = $context->getSocket(\ZMQ::SOCKET_PUSH, 'my pusher');
         $socket->connect("tcp://172.17.0.2:5555");
-        
-        foreach ($entities as $entity) {
-            $jsonentity = $this->get('jms_serializer')->serialize($entity, 'json');
-            $socket->send($jsonentity);
-        }
+        $socket->send($this->get('jms_serializer')->serialize($entities, 'json'));
 
         $json = $this->get('jms_serializer')->serialize($entities, 'json');
 

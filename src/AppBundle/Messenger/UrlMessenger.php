@@ -57,9 +57,7 @@ class UrlMessenger implements WampServerInterface
      */
     public function onSubscribe(ConnectionInterface $conn, $topic)
     {
-        if ($this->subscribedTopics->isEmpty()) {
-            $this->subscribedTopics->push($topic);
-        }
+        $this->subscribedTopics->push($topic);
     }
 
     /**
@@ -77,7 +75,14 @@ class UrlMessenger implements WampServerInterface
      */
     public function onTopicEntry($entry)
     {
+        var_dump($entry);
+        var_dump($this->subscribedTopics->isEmpty());
         $entryData = json_decode($entry, true);
+
+        if ($this->subscribedTopics->isEmpty()) {
+            return;
+        }
+
         $topic = $this->subscribedTopics->pop();
         $topic->broadcast($entryData);
     }

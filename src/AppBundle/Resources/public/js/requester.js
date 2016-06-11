@@ -39,17 +39,6 @@ var UrlBox = React.createClass({
     },
 
     render: function() {
-
-        // var conn = new WebSocket('ws://172.17.0.2:8080');
-        //
-        // conn.onopen = function(e) {
-        //     console.log("Connection established!");
-        // };
-        //
-        // conn.onmessage = function(e) {
-        //     console.log(e.data);
-        // };
-
         var conn = new ab.Session('ws://172.17.0.2:8080',
             function() {
                 conn.subscribe('url_info', function(topic, data) {
