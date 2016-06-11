@@ -15,10 +15,14 @@ class UrlRepository extends \Doctrine\ORM\EntityRepository
      */
     public function getLastBatch()
     {
-        return $this
+        $result = $this
             ->getEntityManager()
-            ->createQuery('SELECT u FROM AppBundle:Url u ORDER BY u.batch')
-            ->getFirstResult()
+            ->createQuery('SELECT u FROM AppBundle:Url u ORDER BY u.id')
+            ->getResult()
         ;
+
+        $last = array_pop($result);
+        
+        return $last;
     }
 }

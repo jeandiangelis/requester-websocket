@@ -76,10 +76,10 @@ class DefaultController extends Controller
 
         $doctrine->getManager()->flush();
 
-        $context = new \ZMQContext();
-        $socket = $context->getSocket(\ZMQ::SOCKET_PUSH, 'my pusher');
-        $socket->connect("tcp://172.17.0.2:5555");
-        $socket->send($this->get('jms_serializer')->serialize($entities, 'json'));
+
+        $command = "php ../bin/console launch:request {$nextBatch}";
+        $process = new Process($command);
+        $process->start();
 
         $json = $this->get('jms_serializer')->serialize($entities, 'json');
 

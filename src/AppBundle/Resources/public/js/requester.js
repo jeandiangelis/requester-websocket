@@ -36,12 +36,10 @@ var UrlBox = React.createClass({
 
     componentDidMount: function() {
         this.loadUrlsFromServer();
-    },
-
-    render: function() {
-        var current = this.state.data;
+        var urlBox = this;
         var conn = new ab.Session('ws://172.17.0.2:8080',
             function() {
+                var current = urlBox.state.data;
                 conn.subscribe('url_info', function(topic, data) {
                     for (var i = 0; i < data.length; i++) {
                         for (var j = 0; j < current.length; j++) {
@@ -53,14 +51,16 @@ var UrlBox = React.createClass({
                     }
                 });
 
-                console.log(current);
+                urlBox.setState({data: current});
             },
             function() {
                 console.warn('WebSocket connection closed');
             },
             {'skipSubprotocolCheck': true}
         );
+    },
 
+    render: function() {
         return (
             <div className="urlBox">
                 <h1>Urls</h1>
@@ -85,6 +85,7 @@ var Url = React.createClass({
             <div className="url">
                 <a href="#"> {this.props.data.name}</a>
                 <p>Status: {status[this.props.data.status]}</p>
+                <p>Batch: {this.props.data.batch}</p>
             </div>
         );
     }
