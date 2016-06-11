@@ -4,10 +4,12 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Url;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Process\Process;
 
 class DefaultController extends Controller
 {
@@ -26,7 +28,7 @@ class DefaultController extends Controller
         }
 
         $this->getDoctrine()->getManager()->flush();
-        return $this->render("AppBundle:index.html.twig");
+        return $this->render('AppBundle::index.html.twig');
     }
 
     /**
@@ -64,6 +66,10 @@ class DefaultController extends Controller
      */
     public function saveUrls(Request $request)
     {
+        $context = new \ZMQContext();
+        $socket = $context->getSocket(\ZMQ::SOCKET_PUSH, 'my pusher');
+        $socket->connect("tcp://172.17.0.2:5555");
+
         $urls = explode("\n", $request->get('urls'));
 
         $doctrine = $this->getDoctrine();
@@ -80,22 +86,16 @@ class DefaultController extends Controller
             $nextBatch = $lastBatchUrl->getBatch() + 1;
         }
 
-        $entities = [];
         foreach ($urls as $url) {
-            $entities[$url] = $entity = new Url($url, $nextBatch, -1);
+            $entity = new Url($url, $nextBatch, -1);
+            $jsonentity = $this->get('jms_serializer')->serialize($entity, 'json');
             $doctrine->getManager()->persist($entity);
+
+            $socket->send($jsonentity);
         }
 
         $doctrine->getManager()->flush();
 
-        /** @var Url $url */
-        foreach ($entities as $url) {
-            $command = "php ../bin/console launch:request {$url->getId()}";
-
-            $process = new Process($command);
-            $process->start();
-        }
-
-        return new Response();
+        return new Response('Success!');
     }
 }

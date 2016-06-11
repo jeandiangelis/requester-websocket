@@ -1,4 +1,3 @@
-var conn = new WebSocket('ws://172.17.0.2:8080');
 var UrlBox = React.createClass({
     loadUrlsFromServer: function() {
         $.ajax({
@@ -49,18 +48,23 @@ var UrlBox = React.createClass({
 
     componentDidMount: function() {
         this.loadUrlsFromServer();
-        setInterval(this.loadUrlsFromServer, this.props.interval);
     },
 
     render: function() {
-        conn.onopen = function(e) {
-            console.log("Connection established!");
-        };
 
-        conn.onmessage = function(e) {
-            console.log(e.data);
-        };
-        
+        var conn = new ab.Session('ws://172.17.0.2:8080',
+            function() {
+                conn.subscribe('kittensCategory', function(topic, data) {
+                    // This is where you would add the new article to the DOM (beyond the scope of this tutorial)
+                    console.log('New article published to category "' + topic + '" : ' + data.title);
+                });
+            },
+            function() {
+                console.warn('WebSocket connection closed');
+            },
+            {'skipSubprotocolCheck': true}
+        );
+
         return (
             <div className="urlBox">
                 <h1>Urls</h1>
@@ -148,6 +152,6 @@ var UrlForm = React.createClass({
 });
 
 ReactDOM.render(
-    <UrlBox url="api/urls" interval={200230} />,
+    <UrlBox url="http://172.17.0.2:8000/api/urls" />,
     document.getElementById('content')
 );
