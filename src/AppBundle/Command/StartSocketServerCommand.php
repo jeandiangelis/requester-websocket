@@ -33,20 +33,24 @@ class StartSocketServerCommand extends ContainerAwareCommand
         ;
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|null|void
+     * @throws \React\Socket\ConnectionException
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $loop   = Factory::create();
         $urlMsg = new UrlMessenger();
 
-        // Listen for the web server to make a ZeroMQ push after an ajax request
         $context = new Context($loop);
         $pull = $context->getSocket(\ZMQ::SOCKET_PULL);
-        $pull->bind('tcp://172.17.0.2:5555'); // Binding to 127.0.0.1 means the only client that can connect is itself
+        $pull->bind('tcp://172.17.0.2:5555');
         $pull->on('message', [$urlMsg, 'onUrlEntry']);
 
-        // Set up our WebSocket server for clients wanting real-time updates
         $webSock = new Server($loop);
-        $webSock->listen(8080, '0.0.0.0'); // Binding to 0.0.0.0 means remotes can connect
+        $webSock->listen(8080, '0.0.0.0');
         $webServer = new IoServer(
             new HttpServer(
                 new WsServer(

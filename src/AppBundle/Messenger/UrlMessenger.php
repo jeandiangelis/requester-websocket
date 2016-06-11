@@ -59,7 +59,7 @@ class UrlMessenger implements WampServerInterface
      */
     public function onUnSubscribe(ConnectionInterface $conn, $topic)
     {
-        // TODO: Implement onUnSubscribe() method.
+
     }
 
     /**

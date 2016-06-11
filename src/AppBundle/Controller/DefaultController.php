@@ -6,41 +6,27 @@ use AppBundle\Entity\Url;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Process;
 
+/**
+ * Class DefaultController
+ */
 class DefaultController extends Controller
 {
-    private function getId()
-    {
-        return 177;
-    }
     /**
      * @Route("/", name="homepage")
      */
     public function indexAction(Request $request)
     {
-        $a = $this->getDoctrine()->getRepository(Url::class)->findAll();
-        foreach ($a as $b) {
-            $this->getDoctrine()->getManager()->remove($b);
-        }
-
-        $this->getDoctrine()->getManager()->flush();
+//        $a = $this->getDoctrine()->getRepository(Url::class)->findAll();
+//        foreach ($a as $b) {
+//            $this->getDoctrine()->getManager()->remove($b);
+//        }
+//
+//        $this->getDoctrine()->getManager()->flush();
         return $this->render('AppBundle::index.html.twig');
-    }
-
-    /**
-     * @Route("/test/{slug}", name="pagina")
-     */
-    public function testAction(Request $request)
-    {
-        $time = random_int(1, 10);
-        echo $time;
-        sleep($time);
-
-        return new Response('troxa', 200);
     }
 
     /**
