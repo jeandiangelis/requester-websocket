@@ -57,7 +57,7 @@ class DefaultController extends Controller
 
         $json = $this->get('jms_serializer')->serialize($data, 'json');
 
-        return new JsonResponse($json, 200, [], true);
+        return new Response($json, 200, []);
     }
 
     /**
@@ -86,16 +86,21 @@ class DefaultController extends Controller
             $nextBatch = $lastBatchUrl->getBatch() + 1;
         }
 
+        $entities = [];
         foreach ($urls as $url) {
-            $entity = new Url($url, $nextBatch, -1);
-            $jsonentity = $this->get('jms_serializer')->serialize($entity, 'json');
+            $entities[] = $entity = new Url($url, $nextBatch, -1);
             $doctrine->getManager()->persist($entity);
-
-            $socket->send($jsonentity);
         }
 
         $doctrine->getManager()->flush();
 
-        return new Response('Success!');
+        foreach ($entities as $entity) {
+            $jsonentity = $this->get('jms_serializer')->serialize($entity, 'json');
+            $socket->send($jsonentity);
+        }
+
+        $json = $this->get('jms_serializer')->serialize($entities, 'json');
+
+        return new Response($json, 200, []);
     }
 }

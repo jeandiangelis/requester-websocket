@@ -34,7 +34,6 @@ class UrlMessenger implements WampServerInterface
 
     public function onPublish(ConnectionInterface $conn, $topic, $event, array $exclude, array $eligible)
     {
-        // In this application if clients send data it's because the user hacked around in console
         $conn->close();
     }
 
@@ -70,14 +69,12 @@ class UrlMessenger implements WampServerInterface
     {
         $entryData = json_decode($entry, true);
 
-        // If the lookup topic object isn't set there is no one to publish to
         if (!array_key_exists($entryData['id'], $this->subscribedTopics)) {
             return;
         }
 
         $topic = $this->subscribedTopics[$entryData['id']];
 
-        // re-send the data to all the clients subscribed to that category
         $topic->broadcast($entryData);
     }
 }

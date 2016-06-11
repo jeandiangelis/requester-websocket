@@ -14,19 +14,19 @@ var UrlBox = React.createClass({
     },
     
     handleUrlsSubmit: function(url) {
-        var urls = this.state.data;
-        var newUrls = url.urls.split("\n");
-
-        for (var i = 0; i < newUrls.length; i++) {
-            newUrls[i] = {
-                'name': newUrls[i],
-                'id': Date.now(),
-                'status': -1
-            };
-        }
-        var state = urls.concat(newUrls);
-
-        this.setState({data: state});
+        // var urls = this.state.data;
+        // var newUrls = url.urls.split("\n");
+        //
+        // for (var i = 0; i < newUrls.length; i++) {
+        //     newUrls[i] = {
+        //         'name': newUrls[i],
+        //         'id': Date.now(),
+        //         'status': -1
+        //     };
+        // }
+        // var state = urls.concat(newUrls);
+        //
+        // this.setState({data: state});
 
         $.ajax({
             url: this.props.url,
@@ -34,7 +34,9 @@ var UrlBox = React.createClass({
             type: 'POST',
             data: url,
             success: function(data) {
-                this.setState({data: data});
+                var urls = this.state.data;
+                var newUrls = urls.concat(data);
+                this.setState({data: newUrls});
             }.bind(this),
             error: function(xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -99,7 +101,7 @@ var UrlList = React.createClass({
         return (
             <div className="urlList">
                 {this.props.data.map(function (url) {
-                    return  <Url data={url}/>
+                    return  <Url data={url} key={url.id}/>
                 })}
             </div>
         );
