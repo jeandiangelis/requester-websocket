@@ -14,7 +14,7 @@ class UrlMessenger implements WampServerInterface
     /**
      * A lookup of all the topics clients have subscribed to
      */
-    protected $subscribedTopics = [];
+    protected $urls = [];
 
     public function onOpen(ConnectionInterface $conn)
     {
@@ -26,13 +26,12 @@ class UrlMessenger implements WampServerInterface
 
     }
 
-    public function onCall(ConnectionInterface $conn, $id, $topic, array $params)
+    public function onCall(ConnectionInterface $conn, $id, $url, array $params)
     {
-        // In this application if clients send data it's because the user hacked around in console
-        $conn->callError($id, $topic, 'You are not allowed to make calls')->close();
+
     }
 
-    public function onPublish(ConnectionInterface $conn, $topic, $event, array $exclude, array $eligible)
+    public function onPublish(ConnectionInterface $conn, $url, $event, array $exclude, array $eligible)
     {
         $conn->close();
     }
@@ -45,19 +44,19 @@ class UrlMessenger implements WampServerInterface
     /**
      * A request to subscribe to a topic has been made
      * @param \Ratchet\ConnectionInterface $conn
-     * @param string|Topic $topic The topic to subscribe to
+     * @param string|Topic $url The topic to subscribe to
      */
-    public function onSubscribe(ConnectionInterface $conn, $topic)
+    public function onSubscribe(ConnectionInterface $conn, $url)
     {
-        $this->subscribedTopics[$topic->getId()] = $topic;
+        $this->urls[$url->getId()] = $url;
     }
 
     /**
      * A request to unsubscribe from a topic has been made
      * @param \Ratchet\ConnectionInterface $conn
-     * @param string|Topic $topic The topic to unsubscribe from
+     * @param string|Topic $url The topic to unsubscribe from
      */
-    public function onUnSubscribe(ConnectionInterface $conn, $topic)
+    public function onUnSubscribe(ConnectionInterface $conn, $url)
     {
 
     }
@@ -69,12 +68,12 @@ class UrlMessenger implements WampServerInterface
     {
         $entryData = json_decode($entry, true);
 
-        if (!array_key_exists($entryData['id'], $this->subscribedTopics)) {
+        if (!array_key_exists($entryData['id'], $this->urls)) {
             return;
         }
 
-        $topic = $this->subscribedTopics[$entryData['id']];
+        $url = $this->urls[$entryData['id']];
 
-        $topic->broadcast($entryData);
+        $url->broadcast($entryData);
     }
 }
