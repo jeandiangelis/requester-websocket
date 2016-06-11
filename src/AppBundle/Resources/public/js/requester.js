@@ -1,3 +1,4 @@
+var conn = new WebSocket('ws://172.17.0.2:8080');
 var UrlBox = React.createClass({
     loadUrlsFromServer: function() {
         $.ajax({
@@ -52,6 +53,14 @@ var UrlBox = React.createClass({
     },
 
     render: function() {
+        conn.onopen = function(e) {
+            console.log("Connection established!");
+        };
+
+        conn.onmessage = function(e) {
+            console.log(e.data);
+        };
+        
         return (
             <div className="urlBox">
                 <h1>Urls</h1>
@@ -139,6 +148,6 @@ var UrlForm = React.createClass({
 });
 
 ReactDOM.render(
-    <UrlBox url="api/urls" interval={2000} />,
+    <UrlBox url="api/urls" interval={200230} />,
     document.getElementById('content')
 );
