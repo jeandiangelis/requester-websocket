@@ -47,7 +47,7 @@ class UrlMessenger implements WampServerInterface
 
     public function onError(ConnectionInterface $conn, \Exception $e)
     {
-
+        var_dump($e);
     }
 
     /**
@@ -75,13 +75,14 @@ class UrlMessenger implements WampServerInterface
      */
     public function onTopicEntry($entry)
     {
-        $entryData = json_decode($entry, true);
-
-        if ($this->subscribedTopics->isEmpty()) {
-            return;
-        }
-
-        $topic = $this->subscribedTopics->pop();
-        $topic->broadcast($entryData);
+        var_dump($entry);
+//        $entryData = json_decode($entry, true);
+//
+//        if ($this->subscribedTopics->isEmpty()) {
+//            return;
+//        }
+//
+//        $topic = $this->subscribedTopics->pop();
+//        $topic->broadcast($entryData);
     }
 }

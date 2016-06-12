@@ -76,11 +76,16 @@ class DefaultController extends Controller
 
         $doctrine->getManager()->flush();
 
+        foreach ($entities as $entity) {
+            $id = $entity->getId();
+            $command = "php ../app/console launch:request {$id}";
+            $process = new Process($command);
+            $process->start();
 
-        $command = "php ../bin/console launch:request {$nextBatch}";
-        $process = new Process($command);
-        $process->start();
-
+            while ($process->isRunning()) {}
+            echo $process->getOutput();exit;
+        }
+//        echo $process->getOutput();exit;
         $json = $this->get('jms_serializer')->serialize($entities, 'json');
 
         return new Response($json, 200, []);

@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class RequestCommand extends ContainerAwareCommand
 {
-    const LAST_BATCH = 'last_batch';
+    const URL_ID = 'id';
 
     protected function configure()
     {
@@ -25,7 +25,7 @@ class RequestCommand extends ContainerAwareCommand
             ->setName('launch:request')
             ->setDescription('Request launcher')
             ->addArgument(
-                static::LAST_BATCH,
+                static::URL_ID,
                 InputArgument::REQUIRED
             );
     }
@@ -36,34 +36,38 @@ class RequestCommand extends ContainerAwareCommand
             ->getContainer()
             ->get('doctrine')
         ;
-//
-        $batch     = $input->getArgument(static::LAST_BATCH);
-        $em     = $doctrine->getEntityManager();
-        $repo   = $doctrine->getRepository(Url::class);
-        $urls   = $repo->findBy(['batch' => $batch]);
 
-        $context = new \ZMQContext();
-        $socket = $context->getSocket(\ZMQ::SOCKET_PUSH, 'my pusher');
-        $socket->connect("tcp://172.17.0.2:5555");
-        $socket->send($this->getContainer()->get('jms_serializer')->serialize($urls, 'json'));
-//        $client = new Client();
-//
-//        $promise = $client->requestAsync(Request::METHOD_GET, $url->getName(), [
-//        ]);
-//
-//        $promise->then(
-//            function (ResponseInterface $response) use ($url, $em) {
-//                $url->setStatus($response->getStatusCode());
-//                echo $response->getBody();
-//                $em->persist($url);
-//                $em->flush();
-//            },
-//            function (RequestException $exception) use ($url, $em) {
-//                $url->setStatus($exception->getCode());
-//                echo $exception->getMessage();
-//                $em->persist($url);
-//                $em->flush();
-//            }
-//        );
+        $id         = $input->getArgument(static::URL_ID);
+        $em         = $doctrine->getManager();
+        $repo       = $doctrine->getRepository(Url::class);
+        $url        = $repo->find($id);
+
+        $client     = new Client();
+
+        $promise = $client->requestAsync(Request::METHOD_GET, $url->getName(), []);
+        $promise->then(
+            function (ResponseInterface $response) use ($url, $em, $output) {
+                $url->setStatus($response->getStatusCode());
+                $em->persist($url);
+                $em->flush();
+
+                $context    = new \ZMQContext();
+                $socket     = $context->getSocket(\ZMQ::SOCKET_PUSH, 'my pusher');
+                $socket->connect("tcp://172.17.0.2:5555");
+                $socket->send($this->getContainer()->get('jms_serializer')->serialize($url, 'json'));
+                $socket->disconnect("tcp://172.17.0.2:5555");
+            },
+            function (RequestException $exception) use ($url, $em) {
+                $url->setStatus($exception->getCode());
+                $em->persist($url);
+                $em->flush();
+
+                $context    = new \ZMQContext();
+                $socket     = $context->getSocket(\ZMQ::SOCKET_PUSH, 'my pusher');
+                $socket->connect("tcp://172.17.0.2:5555");
+                $socket->send($this->getContainer()->get('jms_serializer')->serialize($url, 'json'));
+                $socket->disconnect("tcp://172.17.0.2:5555");
+            }
+        );
     }
 }
