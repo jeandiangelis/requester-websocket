@@ -17,8 +17,9 @@ var UrlBox = React.createClass({
         var current = this.state.data;
         if (current.length > 0) {
             for (var i = 0; i < current.length; i++) {
-                if (current[i].url == data.url) {
-                    current[i] = data;
+                if (current[i].name == data.name) {
+                    current[i].status = data.status;
+                    current[i].batch = data.batch;
                     break;
                 }
             }
@@ -49,15 +50,9 @@ var UrlBox = React.createClass({
             type: 'POST',
             data: url,
             success: function(data) {
-                var current = this.state.data;
-
-                if (current > 0) {
-                    current = current.concat(data);
-                } else {
-                    current = data;
-                }
-
-                this.setState({data: current});
+                var urls = this.state.data;
+                var newUrls = urls.concat(data);
+                this.setState({data: newUrls});
             }.bind(this),
             error: function(xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -110,12 +105,10 @@ var Url = React.createClass({
 
 var UrlList = React.createClass({
     render: function() {
-        console.log(this.props.data);
         return (
             <div className="urlList">
                 {this.props.data.map(function (url) {
-                    console.log(url);
-                    return  <Url data={url} key={url.url}/>
+                    return  <Url data={url} key={url.name}/>
                 })}
             </div>
         );
