@@ -32,42 +32,64 @@ class RequestCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $doctrine = $this
-            ->getContainer()
-            ->get('doctrine')
-        ;
+        $pid = pcntl_fork();
 
-        $id         = $input->getArgument(static::URL_ID);
-        $em         = $doctrine->getManager();
-        $repo       = $doctrine->getRepository(Url::class);
-        $url        = $repo->find($id);
+        if ($pid === -1) {
+            throw new \RuntimeException('Could not fork the process');
+        } elseif ($pid > 0) {
+            $output->writeln('New url being processed ' . $pid);
+        } else {
+            $doctrine = $this
+                ->getContainer()
+                ->get('doctrine')
+            ;
 
-        $client     = new Client();
+            $serializer = $this
+                ->getContainer()
+                ->get('jms_serializer')
+            ;
 
-        $promise = $client->requestAsync(Request::METHOD_GET, $url->getName(), []);
-        $promise->then(
-            function (ResponseInterface $response) use ($url, $em, $output) {
-                $url->setStatus($response->getStatusCode());
-                $em->persist($url);
-                $em->flush();
+            $id     = $input->getArgument(static::URL_ID);
+            $repo   = $doctrine->getRepository(Url::class);
+            $url    = $repo->find($id);
 
-                $context    = new \ZMQContext();
-                $socket     = $context->getSocket(\ZMQ::SOCKET_PUSH, 'my pusher');
-                $socket->connect("tcp://172.17.0.2:5555");
-                $socket->send($this->getContainer()->get('jms_serializer')->serialize($url, 'json'));
-                $socket->disconnect("tcp://172.17.0.2:5555");
-            },
-            function (RequestException $exception) use ($url, $em) {
-                $url->setStatus($exception->getCode());
-                $em->persist($url);
-                $em->flush();
+            $client = new Client();
 
-                $context    = new \ZMQContext();
-                $socket     = $context->getSocket(\ZMQ::SOCKET_PUSH, 'my pusher');
-                $socket->connect("tcp://172.17.0.2:5555");
-                $socket->send($this->getContainer()->get('jms_serializer')->serialize($url, 'json'));
-                $socket->disconnect("tcp://172.17.0.2:5555");
-            }
-        );
+            $promise = $client->requestAsync('GET', $url->getName(), [
+                'progress' => function ($size, $downloaded, $uploadSize, $uploaded) use ($output, $url) {
+                    $output->writeln($url->getName() . ' ---- ' . $size . ' ++++ ' . $downloaded);
+                }
+            ]);
+
+            $promise->then(
+                function (ResponseInterface $response) use ($url, $serializer, $output) {
+                    $status     = $response->getStatusCode();
+                    $context    = new \ZMQContext();
+                    $socket     = $context->getSocket(\ZMQ::SOCKET_PUSH, 'my pusher');
+                    $socket->connect("tcp://172.17.0.2:5555");
+
+                    $url->setStatus($status);
+                    $output->writeln('status: ' . $status);
+                    $jsonUrl = $serializer->serialize($url, 'json');
+                    $socket->send($jsonUrl);
+                    $socket->disconnect("tcp://172.17.0.2:5555");
+                },
+                function (RequestException $exception) use ($url, $serializer, $output) {
+                    $status     = $exception->getCode();
+                    $context    = new \ZMQContext();
+                    $socket     = $context->getSocket(\ZMQ::SOCKET_PUSH, 'my pusher');
+                    $socket->connect("tcp://172.17.0.2:5555");
+
+                    $url->setStatus($status);
+
+                    $socket->send($serializer->serialize($url, 'json'));
+                }
+            );
+
+            $promise->wait();
+
+            $doctrine->getManager()->persist($url);
+            $doctrine->getManager()->flush();
+        }
     }
 }

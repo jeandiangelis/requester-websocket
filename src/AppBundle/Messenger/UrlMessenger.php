@@ -2,9 +2,16 @@
 
 namespace AppBundle\Messenger;
 
+use AppBundle\Entity\Url;
+use Doctrine\ORM\EntityManager;
+use Guzzle\Http\Exception\RequestException;
+use GuzzleHttp\Client;
+use Psr\Http\Message\ResponseInterface;
 use Ratchet\ConnectionInterface;
 use Ratchet\Wamp\Topic;
 use Ratchet\Wamp\WampServerInterface;
+use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class UrlMessenger
@@ -17,10 +24,17 @@ class UrlMessenger implements WampServerInterface
     protected $subscribedTopics;
 
     /**
-     * UrlMessenger constructor.
+     * @var Container
      */
-    public function __construct()
+    protected $container;
+
+    /**
+     * UrlMessenger constructor.
+     * @param Container $container
+     */
+    public function __construct($container)
     {
+        $this->container = $container;
         $this->subscribedTopics = new \SplStack();
     }
 
@@ -75,14 +89,13 @@ class UrlMessenger implements WampServerInterface
      */
     public function onTopicEntry($entry)
     {
-        var_dump($entry);
-//        $entryData = json_decode($entry, true);
-//
-//        if ($this->subscribedTopics->isEmpty()) {
-//            return;
-//        }
-//
-//        $topic = $this->subscribedTopics->pop();
-//        $topic->broadcast($entryData);
+        $entryData = json_decode($entry);
+
+        if ($this->subscribedTopics->isEmpty()) {
+            return;
+        }
+        
+        $topic = $this->subscribedTopics->pop();
+        $topic->broadcast($entryData);
     }
 }

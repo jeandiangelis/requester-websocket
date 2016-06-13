@@ -42,7 +42,7 @@ class StartSocketServerCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $loop   = Factory::create();
-        $urlMsg = new UrlMessenger();
+        $urlMsg = new UrlMessenger($this->getContainer());
 
         $context = new Context($loop);
         $pull = $context->getSocket(\ZMQ::SOCKET_PULL);
