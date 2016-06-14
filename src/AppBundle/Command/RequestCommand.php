@@ -57,7 +57,6 @@ class RequestCommand extends ContainerAwareCommand
 
             $promise = $client->requestAsync('GET', $url->getName(), [
                 'progress' => function ($downloadSize, $downloaded, $uploadSize, $uploaded) use ($output, $url) {
-                    $output->writeln($url->getName() . ' ---- ' . $downloadSize . ' ++++ ' . $downloaded);
                     $url->setSize($downloaded);
                 }
             ]);

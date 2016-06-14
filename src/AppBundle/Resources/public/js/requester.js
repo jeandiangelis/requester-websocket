@@ -15,7 +15,6 @@ var UrlBox = React.createClass({
 
     updateScreen: function (data) {
         var current = this.state.data;
-        console.log(data);
         if (current.length > 0) {
             for (var i = 0; i < current.length; i++) {
                 if (current[i].name == data.name) {

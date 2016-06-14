@@ -17,13 +17,15 @@ class DefaultController extends Controller
 {
     /**
      * @Route("/", name="homepage")
+     * 
+     * Clear database.
      */
     public function indexAction(Request $request)
     {
-//        $a = $this->getDoctrine()->getRepository(Url::class)->findAll();
-//        foreach ($a as $b) {
-//            $this->getDoctrine()->getManager()->remove($b);
-//        }
+        $urls = $this->getDoctrine()->getRepository(Url::class)->findAll();
+        foreach ($urls as $url) {
+            $this->getDoctrine()->getManager()->remove($url);
+        }
 
         $this->getDoctrine()->getManager()->flush();
         return $this->render('AppBundle::index.html.twig');
