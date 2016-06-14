@@ -48,11 +48,34 @@ class Url
     private $status;
 
     /**
-     * @var bool
+     * @var integer
      *
      * @ORM\Column(name="size", type="integer", nullable=true)
      */
     private $size;
+
+    /**
+     * @var Url
+     *
+     * @ORM\OneToOne(targetEntity="Url")
+     */
+    private $rootUrl;
+
+    /**
+     * @return Url
+     */
+    public function getRootUrl()
+    {
+        return $this->rootUrl;
+    }
+
+    /**
+     * @param Url $rootUrl
+     */
+    public function setRootUrl($rootUrl)
+    {
+        $this->rootUrl = $rootUrl;
+    }
 
     /**
      * Url constructor.

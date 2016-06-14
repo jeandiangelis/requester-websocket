@@ -20,10 +20,10 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
-//        $a = $this->getDoctrine()->getRepository(Url::class)->findAll();
-//        foreach ($a as $b) {
-//            $this->getDoctrine()->getManager()->remove($b);
-//        }
+        $a = $this->getDoctrine()->getRepository(Url::class)->findAll();
+        foreach ($a as $b) {
+            $this->getDoctrine()->getManager()->remove($b);
+        }
 
         $this->getDoctrine()->getManager()->flush();
         return $this->render('AppBundle::index.html.twig');
