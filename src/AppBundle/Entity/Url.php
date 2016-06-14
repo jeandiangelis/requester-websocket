@@ -59,22 +59,22 @@ class Url
      *
      * @ORM\OneToOne(targetEntity="Url")
      */
-    private $rootUrl;
+    private $root;
 
     /**
      * @return Url
      */
-    public function getRootUrl()
+    public function getRoot()
     {
-        return $this->rootUrl;
+        return $this->root;
     }
 
     /**
-     * @param Url $rootUrl
+     * @param Url $root
      */
-    public function setRootUrl($rootUrl)
+    public function setRoot($root)
     {
-        $this->rootUrl = $rootUrl;
+        $this->root = $root;
     }
 
     /**
