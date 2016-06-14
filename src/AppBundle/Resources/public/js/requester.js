@@ -15,11 +15,11 @@ var UrlBox = React.createClass({
 
     updateScreen: function (data) {
         var current = this.state.data;
+        console.log(data);
         if (current.length > 0) {
             for (var i = 0; i < current.length; i++) {
                 if (current[i].name == data.name) {
-                    current[i].status = data.status;
-                    current[i].batch = data.batch;
+                    current[i] = data;
                     break;
                 }
             }
@@ -37,7 +37,8 @@ var UrlBox = React.createClass({
             newUrls[i] = {
                 'name': newUrls[i],
                 'status': 'Still working',
-                'batch': 'Still working'
+                'batch': 'Still working',
+                'size': 'Still working'
             };
         }
         var state = urls.concat(newUrls);
@@ -95,9 +96,7 @@ var Url = React.createClass({
     render: function() {
         return (
             <div className="url">
-                <a href={this.props.data.name} target="_blank">{this.props.data.name}</a>
-                <p>Status: {this.props.data.status}</p>
-                <p>Batch: {this.props.data.batch}</p>
+                <a href={this.props.data.name} target="_blank">{this.props.data.name}</a> HTTP Status: {this.props.data.status}; Length: {this.props.data.size} bytes
             </div>
         );
     }

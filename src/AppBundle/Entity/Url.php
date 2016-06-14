@@ -50,25 +50,9 @@ class Url
     /**
      * @var bool
      *
-     * @ORM\Column(name="launched", type="boolean", nullable=true)
+     * @ORM\Column(name="size", type="integer", nullable=true)
      */
-    private $launched;
-
-    /**
-     * @return boolean
-     */
-    public function isLaunched()
-    {
-        return $this->launched;
-    }
-
-    /**
-     * @param boolean $launched
-     */
-    public function setLaunched($launched)
-    {
-        $this->launched = $launched;
-    }
+    private $size;
 
     /**
      * Url constructor.
@@ -81,6 +65,22 @@ class Url
         $this->name = $name;
         $this->batch = $batch;
         $this->status = $statusCode;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isSize()
+    {
+        return $this->size;
+    }
+
+    /**
+     * @param boolean $size
+     */
+    public function setSize($size)
+    {
+        $this->size = $size;
     }
 
     /**

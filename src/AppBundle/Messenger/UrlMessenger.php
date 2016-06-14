@@ -94,7 +94,7 @@ class UrlMessenger implements WampServerInterface
         if ($this->subscribedTopics->isEmpty()) {
             return;
         }
-        
+        var_dump($entryData);
         $topic = $this->subscribedTopics->pop();
         $topic->broadcast($entryData);
     }

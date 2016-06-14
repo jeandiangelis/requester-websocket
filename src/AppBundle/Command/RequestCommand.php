@@ -56,11 +56,12 @@ class RequestCommand extends ContainerAwareCommand
             $client = new Client();
 
             $promise = $client->requestAsync('GET', $url->getName(), [
-                'progress' => function ($size, $downloaded, $uploadSize, $uploaded) use ($output, $url) {
-                    $output->writeln($url->getName() . ' ---- ' . $size . ' ++++ ' . $downloaded);
+                'progress' => function ($downloadSize, $downloaded, $uploadSize, $uploaded) use ($output, $url) {
+                    $output->writeln($url->getName() . ' ---- ' . $downloadSize . ' ++++ ' . $downloaded);
+                    $url->setSize($downloaded);
                 }
             ]);
-
+            
             $promise->then(
                 function (ResponseInterface $response) use ($url, $serializer, $output) {
                     $status     = $response->getStatusCode();
@@ -81,7 +82,6 @@ class RequestCommand extends ContainerAwareCommand
                     $socket->connect("tcp://172.17.0.2:5555");
 
                     $url->setStatus($status);
-
                     $socket->send($serializer->serialize($url, 'json'));
                 }
             );
