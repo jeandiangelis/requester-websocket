@@ -19,6 +19,11 @@ var UrlBox = React.createClass({
             for (var i = 0; i < current.length; i++) {
                 if (current[i].name == data.name) {
                     current[i] = data;
+
+                    if (data.child) {
+                        current.push(data.child);
+                    }
+
                     break;
                 }
             }
@@ -95,7 +100,8 @@ var Url = React.createClass({
     render: function() {
         return (
             <div className="url">
-                <a href={this.props.data.name} target="_blank">{this.props.data.name}</a> HTTP Status: {this.props.data.status}; Length: {this.props.data.size} bytes
+                <a href={this.props.data.name} target="_blank">{this.props.data.name}</a> HTTP Status: {this.props.data.status}; Length: {this.props.data.size} bytes <br />
+                { this.props.data.hasChild ? 'redirected to: ' + this.props.data.child.name : '' }
             </div>
         );
     }
@@ -106,6 +112,9 @@ var UrlList = React.createClass({
         return (
             <div className="urlList">
                 {this.props.data.map(function (url) {
+                    if (url.child) {
+                        url.hasChild = true;
+                    }
                     return  <Url data={url} key={url.name}/>
                 })}
             </div>

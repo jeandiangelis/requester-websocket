@@ -48,11 +48,34 @@ class Url
     private $status;
 
     /**
-     * @var bool
+     * @var integer
      *
      * @ORM\Column(name="size", type="integer", nullable=true)
      */
     private $size;
+
+    /**
+     * @var Url
+     *
+     * @ORM\OneToOne(targetEntity="Url", cascade={"persist"})
+     */
+    private $child;
+
+    /**
+     * @return Url
+     */
+    public function getChild()
+    {
+        return $this->child;
+    }
+
+    /**
+     * @param Url $child
+     */
+    public function setChild($child)
+    {
+        $this->child = $child;
+    }
 
     /**
      * Url constructor.
