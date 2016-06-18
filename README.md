@@ -28,6 +28,6 @@
  * Run another terminal instance and the command `docker exec -it requester bash` again
  * cd /var/www/requester
  * php app/console server:run **DOCKER_IP** :8000
- * Go to the web browser and hit localhost:12345
+ * Go to the web browser and hit 172.17.0.2:8000
  
 That's it!
