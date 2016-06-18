@@ -26,9 +26,13 @@ class StartSocketServerCommand extends ContainerAwareCommand
             ->setName('socketserver:start')
             ->setDescription('Starts the websocket server')
             ->addArgument(
+                'ip',
+                InputArgument::REQUIRED,
+                'set the ip of zeromq'
+            )->addArgument(
                 'port',
                 InputArgument::OPTIONAL,
-                'set the port of your websocket server'
+                'set the port of zeromq'
             )
         ;
     }
@@ -41,12 +45,16 @@ class StartSocketServerCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $ip = $input->getArgument('ip');
+        $port = $input->getArgument('port');
+
         $loop   = Factory::create();
         $urlMsg = new UrlMessenger($this->getContainer());
 
         $context = new Context($loop);
         $pull = $context->getSocket(\ZMQ::SOCKET_PULL);
-        $pull->bind('tcp://172.17.0.2:5555');
+        var_dump('tcp://' . $ip . ':' . $port);
+        $pull->bind('tcp://' . $ip . ':' . $port);
         $pull->on('message', [$urlMsg, 'onTopicEntry']);
 
         $webSock = new Server($loop);
@@ -61,7 +69,7 @@ class StartSocketServerCommand extends ContainerAwareCommand
             ),
             $webSock
         );
-
+        $output->writeln('Websocket server started. Listening on port 8080');
         $loop->run();
     }
 }
